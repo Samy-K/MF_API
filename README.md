@@ -42,6 +42,8 @@ TOKEN = Your_API_Key
 Note: you must either fill in the application ID (using the OAuth2 method, valid for 1 hour) or the token (validity to be specified when creating).
 All information is available on the [Météo France API website](https://portail-api.meteofrance.fr/web/fr).
 
+Information on the data fields of the raw files can be found in this [CSV](https://donneespubliques.meteofrance.fr/client/document/api_clim_table_parametres_horaires_20240103_352.csv)
+
 ## Contributing
 Contributions to this project are welcome. Please fork the repository and submit a pull request with your proposed changes.
 
