@@ -27,11 +27,9 @@ python main.py
 Follow the on-screen prompts to select a department, weather station, and data period.
 
 ## Dependencies
-- Python 3.11
-- requests - For making HTTP requests to the API.
-- pandas - For data manipulation and analysis.
-- datetime - For handling date and time objects.
-- configparser - For reading configuration files.
+- **Python 3.11**
+- **requests** - For making HTTP requests to the API.
+- **pandas** - For data manipulation and analysis.
 
 ## Configuration
 Before running the script, ensure you have a valid **API_config.txt** file in your project directory with the following format:
