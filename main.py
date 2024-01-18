@@ -79,7 +79,7 @@ def main():
         if confirmation == 'Y':
             order_id = client.order_station_data(selected_station, B_annee, E_annee)
             if order_id:
-                print("Order placed successfully. Order ID :", order_id)
+                print("Order(s) placed successfully. Order ID(s) :", order_id)
                 client.download_command_file(order_id)
         else:
             print("Cancelled.")
@@ -87,8 +87,7 @@ def main():
         print("FAIL !")
 
     # Formatting data
-    file_path     = f'command_{order_id}_RAW_DATA.csv' 
-    dataset       = DatasetManager.from_csv(file_path)
+    dataset       = DatasetManager.from_csv(order_id)
     final_dataset = dataset.create_subset()
     quality_check = final_dataset.check_quality()    # Check for missing data
     parameters    = final_dataset.list_parameters()  # List all parameters
@@ -103,9 +102,9 @@ def main():
     
     # Writing data
     final_dataset.save_subset_as_csv(station_name = str(station_info.iloc[0]['ID']) + '_' + str(station_info.iloc[0]['LieuDit']).replace(' ', '-'), 
-                                       start_year=2020, end_year=2023, station_info=station_info)
-    if os.path.exists(file_path):
-        os.remove(file_path)
+                                       start_year=B_annee, end_year=E_annee, station_info=station_info)
+    # Cleaning
+    DatasetManager.delete_temporary_csvs(order_id)
 
 if __name__ == '__main__':
     main()

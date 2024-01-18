@@ -28,13 +28,15 @@ TOKEN_URL    = "https://portail-api.meteofrance.fr/token"
 class Client(object):
 
     def __init__(self, api_key=None, application_id=None, base_url=None):
-        self.base_url = base_url
-        self.session  = requests.Session()
-        self.api_key  = api_key
+        if not api_key and not application_id:
+            raise ValueError("Either an Token or an Application ID must be provided.")
+        self.base_url = base_url if base_url is not None else "DEFAULT_BASE_URL"
+        self.session = requests.Session()
+        self.api_key = api_key
         self.application_id = application_id
-        if api_key:  
+        if api_key:
             self.session.headers.update({'apikey': self.api_key})
-        elif application_id:  
+        else:
             self.obtain_oauth2_token()
 
     def request(self, method, url, **kwargs):
@@ -121,68 +123,50 @@ class Client(object):
         else:
             return None
 
-    def order_station_data(self, station_id, debut, fin):
-        """
-        Sends a request to order hourly data from a weather station for a given period. If the request is accepted, it returns the order ID.
-        
-        :param station_id: The identifier of the weather station for which data is requested.
-        :param debut: The start year of the period for which data is requested (format 'YYYY').
-        :param end: The end year of the period for which data is requested (format 'YYYY').
-        :return: The order identifier if the request is accepted, otherwise None.
-    
-        """
-        order_url = self.base_url + f"/commande-station/horaire?id-station={station_id}&date-deb-periode={debut}-01-01T00%3A00%3A00Z&date-fin-periode={fin}-12-31T23%3A00%3A00Z"
-        response  = self.request('GET', order_url)
-        print("Placing order ...")
-        if response.status_code == 202:
-            try:
-                response_json = response.json()
-                order_id = response_json['elaboreProduitAvecDemandeResponse']['return']
-                return order_id  
-            except (ValueError, KeyError):
-                print("Error extracting 'order_id' from JSON response.")
-        else:
-            print(f"Unexpected status code {response.status_code}: {response.text}")
-            return None
-
-    def download_command_file(self, order_id):
-        """
-        Attempts to download a CSV file from an asynchronous command, checking periodically if the file is ready. If a 500 error is encountered, the function retries after a delay.
-        
-        :param order_id: The identifier of the order for which to download the file.
-        """
-        url          = f"{self.base_url}/commande/fichier?id-cmde={order_id}"
-        ready        = False
-        attempt      = 0
-        max_attempts = 10
-
-        while not ready:
-            response = self.request('GET', url)
-            if response.status_code == 201:
-                filename = f"command_{order_id}_RAW_DATA.csv"
-                with open(filename, 'wb') as f:
-                    f.write(response.content)
-                print(f"File downloaded and saved as {filename}")
-                ready = True
-            elif response.status_code == 204:
-                print("Command is still being processed. Will check again in 10 seconds.")
-                time.sleep(10)
-            elif response.status_code == 404:
-                print("Download failed with status code 404: The command number does not exist.")
-                break
-            elif response.status_code == 410:
-                print("Download failed with status code 410: Production has already been delivered.")
-                break
-            elif response.status_code == 500:
-                attempt += 1
-                print(f"Attempt {attempt} - Download failed with status code 500: Production finished, failed. Will retry in 60 seconds.")
-                time.sleep(60)
-            elif response.status_code == 507:
-                print("Download failed with status code 507: Production rejected by the system (too voluminous).")
-                break
+    def order_station_data(self, station_id, start_year, end_year):
+        order_ids = []
+        for year in range(int(start_year), int(end_year) + 1):
+            print(f"Placing order for the year {year}...")
+            order_url = self.base_url + f"/commande-station/horaire?id-station={station_id}&date-deb-periode={year}-01-01T00%3A00%3A00Z&date-fin-periode={year}-12-31T23%3A00%3A00Z"
+            response = self.request('GET', order_url)
+            if response.status_code == 202:
+                try:
+                    response_json = response.json()
+                    order_id = response_json['elaboreProduitAvecDemandeResponse']['return']
+                    order_ids.append(order_id)
+                except (ValueError, KeyError):
+                    print(f"Error extracting 'order_id' for the year {year}.")
             else:
-                print(f"Unexpected status code {response.status_code}: {response.text}")
-                break
-        if attempt == max_attempts:
-            print("Maximum retry attempts reached. Please check your request or contact API support.")
-        
+                print(f"Unexpected status code {response.status_code} for the year {year}: {response.text}")
+        return order_ids
+
+    def download_command_file(self, order_ids):
+        for order_id in order_ids:
+            url = f"{self.base_url}/commande/fichier?id-cmde={order_id}"
+            ready = False
+            attempt = 0
+            max_attempts = 10
+    
+            while not ready and attempt < max_attempts:
+                response = self.request('GET', url)
+                if response.status_code == 201:
+                    filename = f"command_{order_id}_RAW_DATA.csv"
+                    with open(filename, 'wb') as f:
+                        f.write(response.content)
+                    print(f"File for order {order_id} downloaded and saved as {filename}")
+                    ready = True
+                elif response.status_code in [204, 500]:
+                    attempt += 1
+                    wait_time = 10 if response.status_code == 204 else 60
+                    print(f"Attempt {attempt} for order {order_id} - Waiting for {wait_time} seconds.")
+                    time.sleep(wait_time)
+                elif response.status_code in [404, 410, 507]:
+                    print(f"Download failed for order {order_id} with status code {response.status_code}: {response.text}")
+                    break
+                else:
+                    print(f"Unexpected status code {response.status_code} for order {order_id}: {response.text}")
+                    break
+            if attempt == max_attempts:
+                print(f"Maximum retry attempts reached for order {order_id}.")
+
+       

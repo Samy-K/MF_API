@@ -20,6 +20,7 @@ limitations under the License.
 """
 
 import pandas as pd
+import os
 
 class DatasetManager:
     def __init__(self, data):
@@ -29,12 +30,20 @@ class DatasetManager:
         self.data = data
 
     @classmethod
-    def from_csv(cls, file_path, separator=';', decimal=','):
+    def from_csv(cls, order_ids, separator=';', decimal=','):
         """
-        Class method to create an instance of DatasetManager from a CSV file.
+        Class method to create an instance of DatasetManager from multiple CSV files.
+        Each CSV file corresponds to an order_id and they are concatenated into one DataFrame.
         """
-        data = pd.read_csv(file_path, sep=separator, decimal=decimal)
-        return cls(data)
+        all_data_frames = []
+
+        for order_id in order_ids:
+            file_path = f'command_{order_id}_RAW_DATA.csv'
+            data = pd.read_csv(file_path, sep=separator, decimal=decimal)
+            all_data_frames.append(data)
+
+        concatenated_data = pd.concat(all_data_frames, ignore_index=True)
+        return cls(concatenated_data)
 
     def check_quality(self):
         """
@@ -96,4 +105,14 @@ class DatasetManager:
             fichier.writelines(contenu_original)
         
         print(f"Subset saved as {file_name}")
+        
+    def delete_temporary_csvs(order_ids):
+        """
+        Deletes all temporary CSV files corresponding to each order_id.
+        """
+        for order_id in order_ids:
+            file_path = f'command_{order_id}_RAW_DATA.csv'
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted temporary file: {file_path}")
 
