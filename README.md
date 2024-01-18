@@ -13,8 +13,8 @@ This Python project includes a client for interacting with the MeteoFrance API. 
 To use this project, clone the repository and install the required dependencies.
 
 ```bash
-git clone [repository URL]
-cd [repository directory]
+git clone https://github.com/Samy-K/MF_API_CLIENT.git
+cd MF_API_CLIENT
 pip install -r requirements.txt
 ```
 
