@@ -35,9 +35,9 @@ Follow the on-screen prompts to select a department, weather station, and data p
 Before running the script, ensure you have a valid **API_config.txt** file in your project directory with the following format:
 ```css
 [Parameters]
-APPLICATION_ID = [Your Application ID]
-DATA_SERVER = [API Base URL]
-TOKEN = [Your API Key]
+APPLICATION_ID = Your_Application_ID
+DATA_SERVER = MF_API_SERVER
+TOKEN = Your_API_Key
 ```
 
 ## Contributing
