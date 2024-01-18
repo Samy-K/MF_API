@@ -32,16 +32,15 @@ Follow the on-screen prompts to select a department, weather station, and data p
 - **pandas** - For data manipulation and analysis.
 
 ## Configuration
-Before running the script, ensure you have a valid **API_config.txt** file in your project directory with the following format.
-Note: you must either fill in the application ID (using the OAuth2 method, valid for 1 hour) or the token (validity to be specified when creating).
-
-All information is available on the [Météo France API website](https://portail-api.meteofrance.fr/web/fr).
+Before running the script, ensure you have a valid **API_config.txt** file in your project directory with the following format:
 ```css
 [Parameters]
 APPLICATION_ID = Your_Application_ID
 DATA_SERVER = MF_API_SERVER
 TOKEN = Your_API_Key
 ```
+Note: you must either fill in the application ID (using the OAuth2 method, valid for 1 hour) or the token (validity to be specified when creating).
+All information is available on the [Météo France API website](https://portail-api.meteofrance.fr/web/fr).
 
 ## Contributing
 Contributions to this project are welcome. Please fork the repository and submit a pull request with your proposed changes.
