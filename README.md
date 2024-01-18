@@ -27,7 +27,7 @@ python main.py
 Follow the on-screen prompts to select a department, weather station, and data period.
 
 ## Dependencies
-- **Python 3.11**
+- **Python 3** (tested with 3.11)
 - **requests** - For making HTTP requests to the API.
 - **pandas** - For data manipulation and analysis.
 
