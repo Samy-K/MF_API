@@ -4,7 +4,7 @@
 This Python project includes a client for interacting with the MeteoFrance API. It allows users to authenticate, retrieve lists of weather stations by department, select a specific station, order and download **hourly** weather data, and view station information. The code is structured around a `Client` class that handles API requests and responses.
 
 ## Features
-- OAuth2 authentication with the MeteoFrance API.
+- OAuth2 or token authentication with the MeteoFrance API.
 - Retrieve a list of weather stations for a specified department.
 - Select and view detailed information about a weather station.
 - Order and download weather data for a specified time period.
